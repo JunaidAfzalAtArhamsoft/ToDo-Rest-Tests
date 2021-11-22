@@ -1,21 +1,22 @@
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, GenericAPIView
-from rest_framework.renderers import AdminRenderer, BrowsableAPIRenderer, JSONRenderer
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.renderers import JSONRenderer
+from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import TokenBackendError
 from .serializers import UserSerializer, TaskSerializer
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.shortcuts import redirect
 from django.http import HttpResponse
 from rest_framework import status
-from django.conf import settings
 from django.http import Http404
 from .models import Task
-import uuid
 
 
 def hello(request):
+    """
+    Show Main Page
+    """
     return HttpResponse('<h1>hello</h1>')
 
 
@@ -39,6 +40,25 @@ class RegisterUser(CreateAPIView):
         user = serializer.save()
         user.set_password(serializer.data['password'])
         user.save()
+#
+#
+# class UserLoginView(RetrieveAPIView):
+#
+#     permission_classes = (permissions.AllowAny,)
+#     serializer_class = UserLoginSerializer
+#
+#     def post(self, request):
+#         serializer = self.serializer_class(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         response = {
+#             'success': 'True',
+#             'status code' : status.HTTP_200_OK,
+#             'message': 'User logged in  successfully',
+#             'token': serializer.data['token'],
+#             }
+#         status_code = status.HTTP_200_OK
+#
+#         return Response(response, status=status_code)
 
 
 class TaskListCreateView(ListCreateAPIView):
@@ -53,14 +73,18 @@ class TaskListCreateView(ListCreateAPIView):
         Returns:
             tasks (queryset): Queryset of all tasks related to current user
         """
-        owner = self.request.user
-        owner = User.objects.filter(username=owner)
-        if len(owner) == 0:
-            raise Http404
-        else:
-            tasks = Task.objects.filter(owner=owner[0])
+        # owner = self.request.user
+        # owner = User.objects.filter(username=owner)
+        token = self.request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+        try:
+            valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
+            user = valid_data['user_id']
+            print('this is current user:\n' + str(user))
+            tasks = Task.objects.filter(owner=user)
             self.queryset = tasks
             return tasks
+        except TokenBackendError:
+            raise Http404('Token Expired')
 
     def create(self, request, *args, **kwargs):
         """
@@ -71,20 +95,25 @@ class TaskListCreateView(ListCreateAPIView):
         Returns:
             Response:
         """
-        serializer = self.get_serializer(data=request.data)
-        owner = User.objects.filter(username=self.request.user)
-        if len(owner) == 0:
-            raise Http404
-        else:
+        token = self.request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+        try:
+            valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
+            user = valid_data['user_id']
+
+            serializer = self.get_serializer(data=request.data)
+            # owner = User.objects.filter(username=self.request.user)
             serializer.is_valid(raise_exception=True)
-            serializer.validated_data['owner'] = owner[0]
+            user = User.objects.get(pk=user)
+            serializer.validated_data['owner'] = user
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except TokenBackendError:
+            raise Http404('Token Expired')
 
     # queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     # renderer_classes = [JSONRenderer]
     # lookup_url_kwarg = {'url': 'ToDo_REST:tasks-detail'}
@@ -103,34 +132,31 @@ class TaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         Returns:
             tasks (queryset): Queryset of all tasks related to current user
         """
-        owner = self.request.user
-        owner = User.objects.filter(username=owner)
-        if len(owner) == 0:
-            raise Http404
-        else:
-            tasks = Task.objects.filter(owner=owner[0])
+        # owner = self.request.user
+        # owner = User.objects.filter(username=owner)
+        token = self.request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+        try:
+            valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
+            user = valid_data['user_id']
+            tasks = Task.objects.filter(owner=user)
             self.queryset = tasks
             return tasks
+        except TokenBackendError:
+            raise Http404('Token Expired')
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     serializer_class = TaskSerializer
-    renderer_classes = [AdminRenderer]
+    renderer_classes = [JSONRenderer]
 
 
 # class LoginApiView(GenericAPIView):
-#     serializer_class = LogInSerializer
+#     serializer_class = UserLoginSerializer
 #
 #     def post(self, request):
 #         serializer = self.serializer_class(data=request.data)
 #         serializer.is_valid(raise_exception=True)
 #         return Response(serializer.data, status=status.HTTP_200_OK)
-#
-#
-
-
-# class ForgotPassword(GenericAPIView):
-#     pass
 #
 
 

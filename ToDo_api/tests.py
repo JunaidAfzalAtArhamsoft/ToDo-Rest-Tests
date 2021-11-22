@@ -1,12 +1,7 @@
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APITestCase
 from rest_framework import status
-from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.authtoken.models import Token
-
-from .models import User
-from .serializers import UserSerializer
 from django.urls import reverse
+from .models import User, Task
 
 
 class RegistrationTestCase(APITestCase):
@@ -27,7 +22,6 @@ class RegistrationTestCase(APITestCase):
             'password': '123',
 
         }
-        # url = reverse('/ToDo/register/')
         url = '/register/'
         response1 = self.client.post(url, data)
         response2 = self.client.post(url, data)
@@ -44,7 +38,10 @@ class LoginUserTestCase(APITestCase):
     """
 
     def setUp(self) -> None:
-        user = User.objects.create_user(
+        """
+        Creating user to validating login api
+        """
+        User.objects.create_user(
             first_name='test',
             last_name='test',
             email='test@test.com',
@@ -53,6 +50,10 @@ class LoginUserTestCase(APITestCase):
         )
 
     def test_login_user(self):
+        """
+        testing login api
+        """
+
         url = '/login/'
         data1 = {
             'username': 'test',
@@ -81,7 +82,7 @@ class ForgotPasswordTestCase(APITestCase):
     """
 
     def test_forgot_password(self):
-        user = User.objects.create_user(
+        User.objects.create_user(
             first_name='test',
             last_name='test',
             email='junaidafzal.arhamsoft@gmail.com',
@@ -111,7 +112,7 @@ class ViewTaskTestCase(APITestCase):
         """
         Setup required things for task creating i.e user.
         """
-        user = User.objects.create_user(
+        User.objects.create_user(
             first_name='test',
             last_name='test',
             email='junaidafzal.arhamsoft@gmail.com',
@@ -125,7 +126,6 @@ class ViewTaskTestCase(APITestCase):
         self.client.post('/login/', data1)
 
 
-
 class CreateTaskTestCase(APITestCase):
     """
     Test Task Creation
@@ -136,34 +136,28 @@ class CreateTaskTestCase(APITestCase):
         Setup required things for task creating i.e user.
         """
 
-        self.user = User.objects.create_user(
+        user = User.objects.create_user(
             first_name='test',
             last_name='test',
             email='junaidafzal.arhamsoft@gmail.com',
             username='test',
-            password='12345678qQ'
+            password='12345678qQ',
+            is_staff=True
         )
-        self.user.save()
-
-        data = {
-            'username': 'test',
-            'password': '12345678qQ'
-        }
-
-        response = self.client.login(username='test', password='12345678qQ')
-        print(response)
-        auth_client = APIClient()
-        refresh = RefreshToken.for_user(self.user)
-        # self.SUPERUSER = User(auth_client.post('/v1/auth/', {'username': 'test', 'password': '12345678qQ'})
-        #                       # .data['token'])
-
-        # s = self.client.login(username='test', password='12345678qQ')
-        # self.SUPERUSER = TestUser(auth_client.post('/v1/auth/', {'username': 'TestUser', 'password': 'password'})
-        #                           .data['token'])
-        # print(s)
+        user.save()
+        self.client.login(username='test', password='12345678qQ')
 
     def test_create_task(self):
-        refresh = RefreshToken.for_user(self.user)
+        url = reverse('token_obtain_pair')
+        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # self.assertTrue('token' in resp.data)
+        token = resp.data['access']
+        token = str(token)
+        headers = {
+            'accept': 'application/json',
+            'HTTP_AUTHORIZATION': f'Bearer {token}',
+        }
         data2 = {
             "task_title": "test_task",
             "task_description": "test_description",
@@ -173,7 +167,190 @@ class CreateTaskTestCase(APITestCase):
             "completed_date": "2021-11-19T12:13:10.149Z",
         }
         url = '/tasks/'
-        response = self.client.post(url, data2)
-        print(response.request.keys())
+
+        response = self.client.post(path=url, data=data2, **headers)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+
+class GetTaskTestCase(APITestCase):
+    """
+    Testing Ge api
+    """
+
+    def setUp(self) -> None:
+        """
+        Setup required things for task get i.e user.
+        """
+        self.user = User.objects.create_user(
+            first_name='test',
+            last_name='test',
+            email='junaidafzal.arhamsoft@gmail.com',
+            username='test',
+            password='12345678qQ',
+            is_staff=True
+        )
+        self.user.save()
+        url = reverse('token_obtain_pair')
+        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
+        self.token = resp.data['access']
+        self.headers = {
+            'accept': 'application/json',
+            'HTTP_AUTHORIZATION': f'Bearer {self.token}',
+        }
+
+        self.client.login(username='test', password='12345678qQ')
+        self.task = Task(task_title="test get task",
+                         task_description="test get description",
+                         is_complete=False,
+                         task_category="Home_task",
+                         start_date="2021-11-19T12:13:10.149Z",
+                         completed_date="2021-11-19T12:13:10.149Z",
+                         owner=self.user)
+        self.task.save()
+
+        self.task1 = Task(task_title="test get task 1",
+                          task_description="test get description 1",
+                          is_complete=False,
+                          task_category="Home_task",
+                          start_date="2021-11-19T12:13:10.149Z",
+                          completed_date="2021-11-19T12:13:10.149Z",
+                          owner=self.user)
+        self.task1.save()
+
+    def test_get_task(self):
+        url = '/tasks/'
+        # response = self.client.login(username='test', password='12345678qQ')
+        response = self.client.get(path=url, data={}, **self.headers)
+        # print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_specific_task(self):
+        url = f'/tasks/{2}/'
+        response = self.client.get(path=url, data={}, **self.headers)
+        # print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = f'/tasks/{0}/'
+        response = self.client.get(path=url, data={}, **self.headers)
+        # print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class UpdateTaskTestCase(APITestCase):
+    """
+    Testing put patch apis
+    """
+
+    def setUp(self) -> None:
+        """
+        Setup required things for task get i.e user and creating tasks.
+        """
+        self.user = User.objects.create_user(
+            first_name='test',
+            last_name='test',
+            email='junaidafzal.arhamsoft@gmail.com',
+            username='test',
+            password='12345678qQ',
+            is_staff=True
+        )
+        self.user.save()
+        url = reverse('token_obtain_pair')
+        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
+        self.token = resp.data['access']
+        self.headers = {
+            'accept': 'application/json',
+            'HTTP_AUTHORIZATION': f'Bearer {self.token}',
+        }
+
+        self.client.login(username='test', password='12345678qQ')
+        self.task = Task(task_title="test get task",
+                         task_description="test get description",
+                         is_complete=False,
+                         task_category="Home_task",
+                         start_date="2021-11-19T12:13:10.149Z",
+                         completed_date="2021-11-19T12:13:10.149Z",
+                         owner=self.user)
+        self.task.save()
+
+        self.task1 = Task(task_title="test get task 1",
+                          task_description="test get description 1",
+                          is_complete=False,
+                          task_category="Home_task",
+                          start_date="2021-11-19T12:13:10.149Z",
+                          completed_date="2021-11-19T12:13:10.149Z",
+                          owner=self.user)
+        self.task1.save()
+
+    def test_put_task(self):
+        url = '/tasks/{}/'.format(self.task.id)
+        data = {
+            'task_title': "test put task 1",
+            'task_description': "test put description 1",
+            'is_complete': False,
+            'task_category': "Home_task",
+            'start_date': "2022-11-19T12:13:10.149Z",
+            'completed_date': "2022-11-19T12:13:10.149Z",
+        }
+        response = self.client.put(path=url, data=data, **self.headers)
+        # result = self.client.get(path=f'/tasks/{self.task.id}/', **self.headers)
+        # print(result.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_patch_task(self):
+        url = '/tasks/{}/'.format(self.task.id)
+        data = {
+            'task_title': "test patch task 1",
+            'task_description': "test patch description 1",
+        }
+        response = self.client.patch(path=url, data=data, **self.headers)
+        result = self.client.get(path=f'/tasks/{self.task.id}/', **self.headers)
+        print(result.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+# class DeleteTaskTestCase(APITestCase):
+#
+#     def setUp(self) -> None:
+#         """
+#         Setup required things for task get i.e user.
+#         """
+#         self.user = User.objects.create_user(
+#             first_name='test',
+#             last_name='test',
+#             email='junaidafzal.arhamsoft@gmail.com',
+#             username='test',
+#             password='12345678qQ',
+#             is_staff=True
+#         )
+#         self.user.save()
+#         url = reverse('token_obtain_pair')
+#         resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
+#         self.token = resp.data['access']
+#         self.headers = {
+#             'accept': 'application/json',
+#             'HTTP_AUTHORIZATION': f'Bearer {self.token}',
+#         }
+#
+#         self.client.login(username='test', password='12345678qQ')
+#         self.task = Task(task_title="test get task",
+#                          task_description="test get description",
+#                          is_complete=False,
+#                          task_category="Home_task",
+#                          start_date="2021-11-19T12:13:10.149Z",
+#                          completed_date="2021-11-19T12:13:10.149Z",
+#                          owner=self.user)
+#         self.task.save()
+#
+#         self.task1 = Task(task_title="test get task 1",
+#                           task_description="test get description 1",
+#                           is_complete=False,
+#                           task_category="Home_task",
+#                           start_date="2021-11-19T12:13:10.149Z",
+#                           completed_date="2021-11-19T12:13:10.149Z",
+#                           owner=self.user)
+#         self.task1.save()
+#
+#     def test_delete_task(self):
+#         url = '/tasks/{}/'.format(self.task.id)
+#         response = self.client.delete(path=url, **self.headers)
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
