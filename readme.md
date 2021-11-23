@@ -94,17 +94,19 @@ To install and connecting database with django follow the following steps:
  
  ## Results of test cases
  
+  ``` python3 manage.py test ``
  
  ![test_cases_result](https://user-images.githubusercontent.com/93306663/143041681-d3a39382-c68f-4ecb-930b-d0eb7ec246f9.png)
  
 **result = all test passed**
  
+ ## Results of pylint
+ 
+ 
  ``` pylint to_do_api ```
 
- ## Results of pylint
  
  ![pylint_result](https://user-images.githubusercontent.com/93306663/143041863-bed9a774-f458-4fa5-8489-6b3367609207.png)
  
- ``` python3 manage.py test ```
  
 **result = 9.61 / 10**
