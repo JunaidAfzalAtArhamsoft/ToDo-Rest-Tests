@@ -1,6 +1,4 @@
-"""
-Configuring app
-"""
+""" Configuring app """
 
 from django.apps import AppConfig
 
