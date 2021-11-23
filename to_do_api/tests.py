@@ -119,6 +119,70 @@ class ForgotPasswordTestCase(APITestCase):
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+class DeleteTaskTestCase(APITestCase):
+    """
+    Delete Task api Test
+    """
+
+    def setUp(self) -> None:
+        """
+        Setup required things for task get i.e user.
+        """
+        self.user = User.objects.create_user(
+            first_name='test',
+            last_name='test',
+            email='junaidafzal.arhamsoft@gmail.com',
+            username='test',
+            password='12345678qQ',
+            is_staff=True
+        )
+        self.user.save()
+        url = reverse('token_obtain_pair')
+        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'},
+                                format='json')
+        self.token = resp.data['access']
+        self.headers = {
+            'accept': 'application/json',
+            'HTTP_AUTHORIZATION': f'Bearer {self.token}',
+        }
+
+        self.client.login(username='test', password='12345678qQ')
+        self.task = Task(task_title="test delete task",
+                         task_description="test delete description",
+                         is_complete=False,
+                         task_category="Home_task",
+                         start_date="2021-11-19T12:13:10.149Z",
+                         completed_date="2021-11-19T12:13:10.149Z",
+                         owner=self.user)
+        self.task.save()
+
+        self.task1 = Task(task_title="test soft delete task",
+                          task_description="test soft delete description",
+                          is_complete=False,
+                          task_category="Home_task",
+                          start_date="2021-11-19T12:13:10.149Z",
+                          completed_date="2021-11-19T12:13:10.149Z",
+                          owner=self.user)
+        self.task1.save()
+
+    def test_soft_delete_task(self):
+        """
+        Testing soft delete api that delete task
+        but available in database and hidden from user
+        """
+        url = f'/tasks/soft-delete/{self.task1.pk}/'
+        response = self.client.delete(path=url, **self.headers)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_task(self):
+        """
+        Testing Delete api that permanently delete task
+        """
+        url = f'/tasks/{self.task.pk}/'
+        response = self.client.delete(path=url, **self.headers)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
 class ViewTaskTestCase(APITestCase):
     """
     Test View task on different conditions.
@@ -240,7 +304,7 @@ class GetTaskTestCase(APITestCase):
         """
         url = '/tasks/'
         # response = self.client.login(username='test', password='12345678qQ')
-        response = self.client.get(path=url, data={}, **self.headers)
+        response = self.client.get(path=url, **self.headers)
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -248,13 +312,13 @@ class GetTaskTestCase(APITestCase):
         """
         Testing get specific task api
         """
-        url = f'/tasks/{2}/'
-        response = self.client.get(path=url, data={}, **self.headers)
+        url = f'/tasks/{self.task.pk}/'
+        response = self.client.get(path=url, **self.headers)
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         url = f'/tasks/{0}/'
-        response = self.client.get(path=url, data={}, **self.headers)
+        response = self.client.get(path=url, **self.headers)
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -331,20 +395,22 @@ class UpdateTaskTestCase(APITestCase):
         }
         response = self.client.patch(path=url, data=data, **self.headers)
         result = self.client.get(path=f'/tasks/{self.task.pk}/', **self.headers)
-        print(result.data)
+        # print(result.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
 
 
-class DeleteTaskTestCase(APITestCase):
+class ShowUserTestCase(APITestCase):
     """
-    Delete Task api Test
+    Test User profile show api
     """
 
     def setUp(self) -> None:
         """
-        Setup required things for task get i.e user.
+        Creating User and login to test show_profile api
         """
-        self.user = User.objects.create_user(
+
+        User.objects.create_user(
             first_name='test',
             last_name='test',
             email='junaidafzal.arhamsoft@gmail.com',
@@ -352,39 +418,19 @@ class DeleteTaskTestCase(APITestCase):
             password='12345678qQ',
             is_staff=True
         )
-        self.user.save()
         url = reverse('token_obtain_pair')
-        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'},
-                                format='json')
+        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
         self.token = resp.data['access']
         self.headers = {
             'accept': 'application/json',
             'HTTP_AUTHORIZATION': f'Bearer {self.token}',
         }
 
-        self.client.login(username='test', password='12345678qQ')
-        self.task = Task(task_title="test get task",
-                         task_description="test get description",
-                         is_complete=False,
-                         task_category="Home_task",
-                         start_date="2021-11-19T12:13:10.149Z",
-                         completed_date="2021-11-19T12:13:10.149Z",
-                         owner=self.user)
-        self.task.save()
-
-        self.task1 = Task(task_title="test get task 1",
-                          task_description="test get description 1",
-                          is_complete=False,
-                          task_category="Home_task",
-                          start_date="2021-11-19T12:13:10.149Z",
-                          completed_date="2021-11-19T12:13:10.149Z",
-                          owner=self.user)
-        self.task1.save()
-
-    def test_delete_task(self):
+    def test_show_user_profile(self):
         """
-        Testing Delete api
+        Testing show_user_profile api
         """
-        url = f'/tasks/{self.task.pk}/'
-        response = self.client.delete(path=url, **self.headers)
+
+        url = '/profile/'
+        response = self.client.get(path=url, **self.headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

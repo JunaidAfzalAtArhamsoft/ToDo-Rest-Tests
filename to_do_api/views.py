@@ -1,15 +1,18 @@
 """
 This module contains Apis
 """
+import datetime
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, \
+    RetrieveUpdateDestroyAPIView, DestroyAPIView, ListAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.backends import TokenBackend
+
 from .serializers import UserSerializer, TaskSerializer
 from .models import Task
 
@@ -19,6 +22,16 @@ def hello(request) -> HttpResponse:
     Show Main Page
     """
     return HttpResponse(f'<h1>hello {request.META.get("PATH")}</h1>')
+
+
+def get_tasks() -> Task:
+    """
+    Message:
+        Returns all tasks with status is_complete = False
+    Returns:
+      Task: all tasks with status is_complete = False
+    """
+    return Task.objects.filter(is_complete=False)
 
 
 class RegisterUser(CreateAPIView):
@@ -42,30 +55,16 @@ class RegisterUser(CreateAPIView):
         user.set_password(serializer.data['password'])
         user.save()
 
-#
-# class UserLoginView(RetrieveAPIView):
-#
-#     permission_classes = (permissions.AllowAny,)
-#     serializer_class = UserLoginSerializer
-#
-#     def post(self, request):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         response = {
-#             'success': 'True',
-#             'status code' : status.HTTP_200_OK,
-#             'message': 'User logged in  successfully',
-#             'token': serializer.data['token'],
-#             }
-#         status_code = status.HTTP_200_OK
-#
-#         return Response(response, status=status_code)
-
 
 class TaskListCreateView(ListCreateAPIView):
     """
     Create and Show list of tasks
     """
+
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
     def get_queryset(self) -> Task:
         """
         Message: Filtering tasks queryset according to login user.
@@ -80,7 +79,8 @@ class TaskListCreateView(ListCreateAPIView):
         valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
         user = valid_data['user_id']
         print('this is current user:\n' + str(user))
-        tasks = Task.objects.filter(owner=user)
+        print('request from ' + str(self.request.user))
+        tasks = get_tasks().filter(owner=user)
         self.queryset = tasks
         return tasks
 
@@ -93,6 +93,7 @@ class TaskListCreateView(ListCreateAPIView):
         Returns:
             Response:
         """
+
         token = self.request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
         valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
         user = valid_data['user_id']
@@ -104,9 +105,6 @@ class TaskListCreateView(ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    serializer_class = TaskSerializer
-    # permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
 
 
 class TaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
@@ -127,11 +125,56 @@ class TaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
         valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
         user = valid_data['user_id']
-        tasks = Task.objects.filter(owner=user)
+        tasks = get_tasks().filter(owner=user, is_complete=False)
         self.queryset = tasks
         return tasks
 
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     serializer_class = TaskSerializer
     renderer_classes = [JSONRenderer]
+
+
+class SoftDeleteTask(DestroyAPIView):
+    """ Task will be deleted but available in database. """
+
+    authentication_classes = [JWTAuthentication]
+    queryset = get_tasks()
+
+    def perform_destroy(self, instance) -> None:
+        """
+        Message: Set is_complete status to True.
+        Parameters:
+             self:
+             instance: task to be soft deleted
+        Returns:
+            None
+        """
+        instance.is_complete = True
+        instance.completed_date = datetime.datetime.now()
+        instance.save()
+
+
+class ShowUserProfile(ListAPIView):
+    """
+    Show information of currently Login user
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        """
+        Message: Filtering queryset according to current login user.
+        Parameters:
+            self:
+        Returns:
+            Task (queryset): Queryset of all tasks related to current user
+        """
+
+        token = self.request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+        valid_data = TokenBackend(algorithm='HS256').decode(token, verify=False)
+        user = valid_data['user_id']
+        user = User.objects.get(pk=user)
+        return [user]

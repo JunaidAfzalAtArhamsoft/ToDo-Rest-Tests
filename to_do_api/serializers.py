@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Serialize User Model
     """
+
     password = serializers.CharField(
         style={'input_type': 'password'})
 
@@ -18,14 +19,17 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Specifying model and fields to be serialize.
         """
+
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password']
+        write_only_fields = ('password', )
 
 
 class TaskSerializer(serializers.ModelSerializer):
     """
     Serialize Task Model
     """
+
     link = serializers.SerializerMethodField()
 
     class Meta:

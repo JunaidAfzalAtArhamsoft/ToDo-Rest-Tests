@@ -23,21 +23,18 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     """
 
     url = 'http://127.0.0.1:8000/api/password_reset/confirm/'
-    email_plaintext_message = f"{url}?token={reset_password_token.key}\n" \
-                              f"instance = {instance}" \
-                              f"\nsender = {sender}\n" \
-                              f"args = {args}\n " \
-                              f"kwargs = {kwargs}"
+    email_plaintext_message = f"""{url}?token={reset_password_token.key}"
+              \ninstance = {instance}
+              \nsender = {sender}\n
+              \nargs = {args}\n 
+              \nkwargs = {kwargs}
+              """
 
     send_mail(
-        # title:
-        "Password Reset for Task Management System",
-        # message:
-        email_plaintext_message,
-        # from:
-        "Junaid Afzal",
-        # to:
-        [reset_password_token.user.email]
+        subject="Password Reset for Task Management System",
+        message=email_plaintext_message,
+        from_email="Junaid Afzal",
+        recipient_list=[reset_password_token.user.email]
     )
 
 
@@ -55,7 +52,7 @@ class Task(models.Model):
     ]
     task_category = models.CharField(max_length=11, choices=category, blank=False)
     start_date = models.DateTimeField(default=datetime.now())
-    completed_date = models.DateTimeField(blank=True, null=True)
+    completed_date = models.DateTimeField(blank=True, null=True, default='')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
@@ -68,8 +65,15 @@ class Task(models.Model):
         """
         return str(self.task_title)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> reverse:
         """
         Return url for specific task
         """
         return reverse('tasks/<int:pk>/', kwargs={'pk': self.pk})
+
+    class Meta:
+        """
+        Specifying Task Order
+        """
+
+        ordering = ('pk',)
