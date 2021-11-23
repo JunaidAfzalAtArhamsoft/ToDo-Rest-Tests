@@ -1,3 +1,7 @@
+"""
+This module test to_do_api app's all apis
+"""
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
@@ -9,7 +13,10 @@ class RegistrationTestCase(APITestCase):
     Test User Registration In different cases.
     """
 
-    def test_registration(self):
+    def test_registration(self) -> None:
+        """
+        Testing User Registration
+        """
         data = {
             'username': 'test_user',
             'email': 'test_user@test.com',
@@ -49,7 +56,7 @@ class LoginUserTestCase(APITestCase):
             password='test'
         )
 
-    def test_login_user(self):
+    def test_login_user(self) -> None:
         """
         testing login api
         """
@@ -81,7 +88,10 @@ class ForgotPasswordTestCase(APITestCase):
     Test Forgot Password api
     """
 
-    def test_forgot_password(self):
+    def setUp(self) -> None:
+        """
+        Creating User
+        """
         User.objects.create_user(
             first_name='test',
             last_name='test',
@@ -89,15 +99,21 @@ class ForgotPasswordTestCase(APITestCase):
             username='test',
             password='test'
         )
-        url = '/api/password_reset/'
+
+    def test_forgot_password(self) -> None:
+        """
+        Testing api with registered and unregistered email
+        """
+
         data1 = {
             "email": "junaidafzal.arhamsoft@gmail.com"
         }
         data2 = {
             "email": "junaid@gmail.com"
         }
-        response1 = self.client.post(url, data1)
-        response2 = self.client.post(url, data2)
+        url = '/api/password_reset/'
+        response1 = self.client.post(path=url, data=data1)
+        response2 = self.client.post(path=url, data=data2)
 
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
@@ -123,7 +139,7 @@ class ViewTaskTestCase(APITestCase):
             'username': 'test',
             'password': 'test'
         }
-        self.client.post('/login/', data1)
+        self.client.post(path='/login/', data=data1)
 
 
 class CreateTaskTestCase(APITestCase):
@@ -136,7 +152,7 @@ class CreateTaskTestCase(APITestCase):
         Setup required things for task creating i.e user.
         """
 
-        user = User.objects.create_user(
+        User.objects.create_user(
             first_name='test',
             last_name='test',
             email='junaidafzal.arhamsoft@gmail.com',
@@ -144,10 +160,12 @@ class CreateTaskTestCase(APITestCase):
             password='12345678qQ',
             is_staff=True
         )
-        user.save()
         self.client.login(username='test', password='12345678qQ')
 
-    def test_create_task(self):
+    def test_create_task(self) -> None:
+        """
+        Testing create task api
+        """
         url = reverse('token_obtain_pair')
         resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -167,7 +185,6 @@ class CreateTaskTestCase(APITestCase):
             "completed_date": "2021-11-19T12:13:10.149Z",
         }
         url = '/tasks/'
-
         response = self.client.post(path=url, data=data2, **headers)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -217,14 +234,20 @@ class GetTaskTestCase(APITestCase):
                           owner=self.user)
         self.task1.save()
 
-    def test_get_task(self):
+    def test_get_task(self) -> None:
+        """
+        Testing get all tasks api
+        """
         url = '/tasks/'
         # response = self.client.login(username='test', password='12345678qQ')
         response = self.client.get(path=url, data={}, **self.headers)
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_specific_task(self):
+    def test_get_specific_task(self) -> None:
+        """
+        Testing get specific task api
+        """
         url = f'/tasks/{2}/'
         response = self.client.get(path=url, data={}, **self.headers)
         # print(response.data)
@@ -281,8 +304,11 @@ class UpdateTaskTestCase(APITestCase):
                           owner=self.user)
         self.task1.save()
 
-    def test_put_task(self):
-        url = '/tasks/{}/'.format(self.task.id)
+    def test_put_task(self) -> None:
+        """
+        Testing Put api
+        """
+        url = f'/tasks/{self.task.pk}/'
         data = {
             'task_title': "test put task 1",
             'task_description': "test put description 1",
@@ -292,65 +318,73 @@ class UpdateTaskTestCase(APITestCase):
             'completed_date': "2022-11-19T12:13:10.149Z",
         }
         response = self.client.put(path=url, data=data, **self.headers)
-        # result = self.client.get(path=f'/tasks/{self.task.id}/', **self.headers)
-        # print(result.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_patch_task(self):
-        url = '/tasks/{}/'.format(self.task.id)
+    def test_patch_task(self) -> None:
+        """
+        Testing patch api
+        """
+        url = f'/tasks/{self.task.pk}/'
         data = {
             'task_title': "test patch task 1",
             'task_description': "test patch description 1",
         }
         response = self.client.patch(path=url, data=data, **self.headers)
-        result = self.client.get(path=f'/tasks/{self.task.id}/', **self.headers)
+        result = self.client.get(path=f'/tasks/{self.task.pk}/', **self.headers)
         print(result.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-# class DeleteTaskTestCase(APITestCase):
-#
-#     def setUp(self) -> None:
-#         """
-#         Setup required things for task get i.e user.
-#         """
-#         self.user = User.objects.create_user(
-#             first_name='test',
-#             last_name='test',
-#             email='junaidafzal.arhamsoft@gmail.com',
-#             username='test',
-#             password='12345678qQ',
-#             is_staff=True
-#         )
-#         self.user.save()
-#         url = reverse('token_obtain_pair')
-#         resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'}, format='json')
-#         self.token = resp.data['access']
-#         self.headers = {
-#             'accept': 'application/json',
-#             'HTTP_AUTHORIZATION': f'Bearer {self.token}',
-#         }
-#
-#         self.client.login(username='test', password='12345678qQ')
-#         self.task = Task(task_title="test get task",
-#                          task_description="test get description",
-#                          is_complete=False,
-#                          task_category="Home_task",
-#                          start_date="2021-11-19T12:13:10.149Z",
-#                          completed_date="2021-11-19T12:13:10.149Z",
-#                          owner=self.user)
-#         self.task.save()
-#
-#         self.task1 = Task(task_title="test get task 1",
-#                           task_description="test get description 1",
-#                           is_complete=False,
-#                           task_category="Home_task",
-#                           start_date="2021-11-19T12:13:10.149Z",
-#                           completed_date="2021-11-19T12:13:10.149Z",
-#                           owner=self.user)
-#         self.task1.save()
-#
-#     def test_delete_task(self):
-#         url = '/tasks/{}/'.format(self.task.id)
-#         response = self.client.delete(path=url, **self.headers)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+class DeleteTaskTestCase(APITestCase):
+    """
+    Delete Task api Test
+    """
+
+    def setUp(self) -> None:
+        """
+        Setup required things for task get i.e user.
+        """
+        self.user = User.objects.create_user(
+            first_name='test',
+            last_name='test',
+            email='junaidafzal.arhamsoft@gmail.com',
+            username='test',
+            password='12345678qQ',
+            is_staff=True
+        )
+        self.user.save()
+        url = reverse('token_obtain_pair')
+        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'},
+                                format='json')
+        self.token = resp.data['access']
+        self.headers = {
+            'accept': 'application/json',
+            'HTTP_AUTHORIZATION': f'Bearer {self.token}',
+        }
+
+        self.client.login(username='test', password='12345678qQ')
+        self.task = Task(task_title="test get task",
+                         task_description="test get description",
+                         is_complete=False,
+                         task_category="Home_task",
+                         start_date="2021-11-19T12:13:10.149Z",
+                         completed_date="2021-11-19T12:13:10.149Z",
+                         owner=self.user)
+        self.task.save()
+
+        self.task1 = Task(task_title="test get task 1",
+                          task_description="test get description 1",
+                          is_complete=False,
+                          task_category="Home_task",
+                          start_date="2021-11-19T12:13:10.149Z",
+                          completed_date="2021-11-19T12:13:10.149Z",
+                          owner=self.user)
+        self.task1.save()
+
+    def test_delete_task(self):
+        """
+        Testing Delete api
+        """
+        url = f'/tasks/{self.task.pk}/'
+        response = self.client.delete(path=url, **self.headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
