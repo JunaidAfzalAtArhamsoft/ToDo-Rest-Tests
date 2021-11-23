@@ -21,9 +21,9 @@ Every Api required JWT Authentication and IsAuthenticated except following:
 ## Database
 This project used postgres database. 
 
-### database setup
+### Database setup
 To install and connecting database with django follow the following steps:
-#### install Postgres
+#### Install Postgres
 **Create the file repository configuration**:
 
 
@@ -99,8 +99,12 @@ To install and connecting database with django follow the following steps:
  
 **result = all test passed**
  
+ ``` pylint to_do_api ```
+
  ## Results of pylint
  
  ![pylint_result](https://user-images.githubusercontent.com/93306663/143041863-bed9a774-f458-4fa5-8489-6b3367609207.png)
+ 
+ ``` python3 manage.py test ```
  
 **result = 9.61 / 10**
