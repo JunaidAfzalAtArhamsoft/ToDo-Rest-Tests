@@ -16,14 +16,12 @@ Every Api required JWT Authentication and IsAuthenticated except following:
 - Register
 - Forgot Password
 
-# Setup
-
-## Database
+# Database
 This project used postgres database. 
 
-### Database setup
+## Database setup
 To install and connecting database with django follow the following steps:
-#### Install Postgres
+### Install Postgres
 **Create the file repository configuration**:
 
 
@@ -62,34 +60,39 @@ sudo apt-get -y install postgresql
  sudo apt-get install postgresql-client
  ```
  
- **additional supplied modules (part of the postgresql-xx package in version 10 and later)**
+ **Additional supplied modules (part of the postgresql-xx package in version 10 and later)**
  
  ``` 
  sudo apt-get install postgresql-contrib-9.x	
  ``` 
  
- **libraries and headers for C language frontend development**
+ **Libraries and headers for C language frontend development**
 
 ``` 
 sudo apt-get install libpq-dev 
 ```
 
-**libraries and headers for C language backend development**
+**Libraries and headers for C language backend development**
 
 ``` 
 sudo apt-get install postgresql-server-dev
 ```
 
-## install pgadmin4 
+## Install pgadmin4 
 ``` 
 curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add - 
 ```
+
 ``` 
 sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/focal pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list'
 ```
-``` sudo apt update
+
+``` 
+sudo apt update
 ```
-``` sudo apt install pgadmin4
+
+```
+sudo apt install pgadmin4
 ```
 
 # Instructions
@@ -124,19 +127,41 @@ python3 manage.py migrate
  python3 manage.py runserver
  ```
  
- # Results
  
- ## Results of test cases
+ # Testing Apis
+ 
+ Use below command to test apis.
  
   ```
   python3 manage.py test
   ```
- 
+  If you see error:
+  
+  ``` Django user has no permission createdatabase ```
+  
+  Fix it by:
+  
+  Open terminal by
+  ```
+  Ctrl + alt + T
+  ```
+  Run command here
+  ```
+  sudo -u postgres psql
+  ```
+ Now run this command here on postgres console
+ ```
+ Alter User user(database user that set in django settings.py) createDB;
+ ```
+ Now run the test command again:
+ ```
+ python3 manage.py test
+ ```
  ![test_cases_result](https://user-images.githubusercontent.com/93306663/143041681-d3a39382-c68f-4ecb-930b-d0eb7ec246f9.png)
  
-**result = all test passed**
+**Result:  All test passed**
  
- ## Results of pylint
+# Pylint Testing
  
  
  ``` 
@@ -147,4 +172,4 @@ python3 manage.py migrate
  ![pylint_result](https://user-images.githubusercontent.com/93306663/143041863-bed9a774-f458-4fa5-8489-6b3367609207.png)
  
  
-**result = 9.61 / 10**
+**Result: 9.61 / 10**
