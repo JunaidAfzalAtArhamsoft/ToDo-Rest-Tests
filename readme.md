@@ -48,7 +48,7 @@ sudo apt-get update
 sudo apt-get -y install postgresql
 ```
 
-**If you want a specific version, use:
+**If you want a specific version, use**:
 
  ```
  sudo apt-get -y install postgresql-12
