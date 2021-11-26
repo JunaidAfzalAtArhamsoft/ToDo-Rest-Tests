@@ -2,12 +2,11 @@
 This module contains Apis
 """
 import datetime
-
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie, vary_on_headers
+from django.views.decorators.vary import vary_on_cookie
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
@@ -15,8 +14,6 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView, \
     RetrieveUpdateDestroyAPIView, DestroyAPIView, ListAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.backends import TokenBackend
-
-
 from .serializers import UserSerializer, TaskSerializer
 from .models import Task
 
@@ -143,7 +140,21 @@ class SoftDeleteTask(DestroyAPIView):
     """ Task will be deleted but available in database. """
 
     authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = get_tasks()
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        If task is already soft-deleted than return Response with 404
+        If task is not soft deleted than soft-delete it and return Response with 204
+        """
+        instance = self.get_object()
+        task_status = status.HTTP_204_NO_CONTENT
+        if instance.is_complete:
+            task_status = status.HTTP_404_NOT_FOUND
+
+        self.perform_destroy(instance)
+        return Response(status=task_status)
 
     def perform_destroy(self, instance) -> None:
         """
@@ -154,6 +165,7 @@ class SoftDeleteTask(DestroyAPIView):
         Returns:
             None
         """
+
         instance.is_complete = True
         instance.completed_date = datetime.datetime.now()
         instance.save()
@@ -185,12 +197,22 @@ class ShowUserProfile(ListAPIView):
 
 
 class Temp(ListAPIView):
+    """
+    Caching page practice
+    """
     serializer_class = TaskSerializer
-    queryset = Task.objects.all()
+    queryset = User.objects.all()
 
     @method_decorator(cache_page(60 * 60 * 2))
     @method_decorator(vary_on_cookie)
-    def list(self, request, *args, **kwargs):
-        data = Task.objects.all()
+    def list(self, request, *args, **kwargs) -> Response:
+        """
+        Show List of all tasks
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        data = get_tasks()
         serializer = self.get_serializer(data, many=True)
         return Response(serializer.data)
