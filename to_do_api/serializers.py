@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         style={'input_type': 'password'})
 
-    class Meta:
+    class Meta:  # pylint: disable=R0903
         """
         Specifying model and fields to be serialize.
         """
@@ -32,7 +32,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     link = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta:  # pylint: disable=R0903
         """
         Specifying model and fields to be serialize.
         """

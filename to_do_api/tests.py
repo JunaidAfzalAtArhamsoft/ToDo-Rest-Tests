@@ -49,7 +49,7 @@ class GenericTest(APITestCase):
         Returns:
             task: Task object
         """
-        self.task = Task(
+        self.task = Task(  # pylint: disable=W0201
             task_title=title,
             task_description="test delete description",
             is_complete=is_complete,
@@ -62,11 +62,11 @@ class GenericTest(APITestCase):
         return self.task
 
     @staticmethod
-    def get_tasks(pk):
+    def get_tasks(key):
         """
         Return list of tasks
         """
-        return Task.objects.get(pk=pk)
+        return Task.objects.get(pk=key)  # pylint: disable=E1101
 
 
 class RegistrationTestCase(APITestCase):
@@ -123,12 +123,6 @@ class LoginUserTestCase(GenericTest):
     """
     Test login api with valid and invalid credentials.
     """
-
-    def setUp(self) -> None:
-        """
-        Creating user to validating login api
-        """
-        super().setUp()
 
     def test_valid_login_user(self) -> None:
         """
@@ -240,10 +234,10 @@ class DeleteTaskTestCase(GenericTest):
             **self.headers
         )
 
-        my_task = Task.objects.get(pk=self.task.pk)
+        my_task = Task.objects.get(pk=self.task.pk)  # pylint: disable=E1101
         self.assertEqual(my_task.is_complete, True)
 
-        number_tasks_in_db = len(Task.objects.all())
+        number_tasks_in_db = len(Task.objects.all())  # pylint: disable=E1101
         self.assertEqual(number_tasks_in_db, 3)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -287,7 +281,7 @@ class DeleteTaskTestCase(GenericTest):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # There must be 2 tasks available in db now
-        number_tasks_in_db = len(Task.objects.all())
+        number_tasks_in_db = len(Task.objects.all())  # pylint: disable=E1101
         self.assertEqual(number_tasks_in_db, 2)
 
 
@@ -370,7 +364,7 @@ class CreateTaskTestCase(GenericTest):
             data=data,
             **self.headers
         )
-        tasks = Task.objects.all()
+        tasks = Task.objects.all()  # pylint: disable=E1101
         self.assertEqual(len(tasks), 1)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -392,7 +386,7 @@ class CreateTaskTestCase(GenericTest):
             data=data,
             **self.headers
         )
-        tasks = Task.objects.all()
+        tasks = Task.objects.all()  # pylint: disable=E1101
         self.assertEqual(len(tasks), 0)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

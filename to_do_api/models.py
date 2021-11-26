@@ -71,7 +71,7 @@ class Task(models.Model):
         """
         return reverse('tasks/<int:pk>/', kwargs={'pk': self.pk})
 
-    class Meta:
+    class Meta:  # pylint: disable=R0903
         """
         Specifying Task Order
         """

@@ -32,7 +32,7 @@ def get_tasks() -> Task:
     Returns:
       Task: all tasks with status is_complete = False
     """
-    return Task.objects.filter(is_complete=False)
+    return Task.objects.filter(is_complete=False)  # pylint: disable=E1101
 
 
 class RegisterUser(CreateAPIView):
