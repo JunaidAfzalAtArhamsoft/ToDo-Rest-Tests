@@ -157,7 +157,9 @@ python3 manage.py migrate
  ```
  python3 manage.py test
  ```
- ![test_cases_result](https://user-images.githubusercontent.com/93306663/143041681-d3a39382-c68f-4ecb-930b-d0eb7ec246f9.png)
+ 
+ ![new test result](https://user-images.githubusercontent.com/93306663/143591169-01f01ba0-0303-4192-b2eb-ed18a2519f6a.png)
+
  
 **Result:  All test passed**
  
@@ -169,7 +171,9 @@ python3 manage.py migrate
  ```
 
  
- ![pylint_result](https://user-images.githubusercontent.com/93306663/143041863-bed9a774-f458-4fa5-8489-6b3367609207.png)
+![new pylint result](https://user-images.githubusercontent.com/93306663/143591234-63bd7971-4f8d-491c-92ca-20988941ff5f.png)
+
+
  
  
-**Result: 9.61 / 10**
+**Result: 9.97 / 10**
