@@ -5,6 +5,9 @@ import datetime
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
@@ -12,6 +15,7 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView, \
     RetrieveUpdateDestroyAPIView, DestroyAPIView, ListAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.backends import TokenBackend
+
 
 from .serializers import UserSerializer, TaskSerializer
 from .models import Task
@@ -178,3 +182,15 @@ class ShowUserProfile(ListAPIView):
         user = valid_data['user_id']
         user = User.objects.get(pk=user)
         return [user]
+
+
+class Temp(ListAPIView):
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    @method_decorator(vary_on_cookie)
+    def list(self, request, *args, **kwargs):
+        data = Task.objects.all()
+        serializer = self.get_serializer(data, many=True)
+        return Response(serializer.data)

@@ -13,4 +13,5 @@ urlpatterns = [
     path('tasks/<int:pk>/', views.TaskDetailUpdateDeleteView.as_view(), name='tasks-detail'),
     path('tasks/soft-delete/<int:pk>/', views.SoftDeleteTask.as_view(), name='soft_delete'),
     path('profile/', views.ShowUserProfile.as_view(), name='user_profile'),
+    path('temp/', views.Temp.as_view(), name='temp')
 ]

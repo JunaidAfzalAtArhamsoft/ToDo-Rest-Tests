@@ -138,8 +138,11 @@ class DeleteTaskTestCase(APITestCase):
         )
         self.user.save()
         url = reverse('token_obtain_pair')
-        resp = self.client.post(url, {'username': 'test', 'password': '12345678qQ'},
-                                format='json')
+        resp = self.client.post(
+            path=url,
+            data={'username': 'test', 'password': '12345678qQ'},
+            format='json'
+        )
         self.token = resp.data['access']
         self.headers = {
             'accept': 'application/json',
