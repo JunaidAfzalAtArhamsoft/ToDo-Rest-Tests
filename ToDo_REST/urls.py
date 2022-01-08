@@ -39,7 +39,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('to_do_api.urls')),
+    path('', include('frontend.urls')),
     # path('auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     # path(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
