@@ -22,6 +22,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+from . import settings
+from django.conf.urls.static import static
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -39,7 +41,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('to_do_api.urls')),
+    path('', include('frontend.urls')),
     # path('auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     # path(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
@@ -48,5 +50,4 @@ urlpatterns = [
     path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 
 ]
-
-
+# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
