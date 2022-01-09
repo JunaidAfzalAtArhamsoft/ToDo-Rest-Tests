@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,12 +88,20 @@ input:checked + .slider:before {
 
 </style>
   <style>
-body {font-family: Arial, Helvetica, sans-serif;}
+body {
+font-family: Arial, Helvetica, sans-serif;
+margin:0px;
+  padding:0px;
+}
 
 .navbar {
+
+  margin:0px;
+  padding:0px;
   width: 100%;
   background-color: #555;
   overflow: auto;
+  position: fixed;
 }
 
 .navbar a {
@@ -100,6 +110,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
   color: white;
   text-decoration: none;
   font-size: 17px;
+
 }
 
 .navbar a:hover {
@@ -117,12 +128,44 @@ body {font-family: Arial, Helvetica, sans-serif;}
   }
 }
 </style>
-</head>
+  <style>
+      .rotate {
+    animation: rotation 2s;
+  }
 
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="margin-top:0;" >
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+
+
+  .rotate {
+    animation: rotation 8s infinite linear;
+  }
+
+
+  #loading {
+    -webkit-animation: rotation 30s infinite linear;
+}
+
+
+
+
+  </style>
+</head>
+<nav class="navbar navbar-expand-lg navbar-fixed-top navbar-dark bg-dark" >
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">
+          <img id="loading"
+            src="{% static 'frontend images/2.png' %}"
+            width="40"
+            height="40"
+            >
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -132,23 +175,12 @@ body {font-family: Arial, Helvetica, sans-serif;}
               <a class="nav-link active" aria-current="page" href="#">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
+              <a class="nav-link" href="#">Dashboard</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link disabled">Disabled</a>
+              <a class="nav-link disabled">Profile</a>
             </li>
-            <li class="nav-item" style="margin-left: 520px; margin-top: 8px;">
+            <li class="nav-item" style="margin-left: 640px; margin-top: 8px;">
               <label class="switch">
                 <input type="checkbox" onclick="myFunction()">
                 <span class="slider round"></span>
@@ -163,11 +195,97 @@ body {font-family: Arial, Helvetica, sans-serif;}
         </div>
       </div>
   </nav>
-    <h1>Task Management System</h1>
+<body>
 
-  This is landing page of Task Management System.
+  <div class="container" style="padding-top:10px;">
+    <br>
+    <br>
+    <h1 style="text-align: center; font-family: 'High Tower Text">Task Management System</h1>
+    This is landing page of Task Management System.
+  </div>
+
+
+
+
+
+
 <br>
 <br>
+
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p><br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
+<br>
+<p>
+  ------
+</p>
 
 
 
@@ -178,5 +296,6 @@ function myFunction() {
    var element = document.body;
    element.classList.toggle("dark-mode");
 }
+
 </script>
 </html>
