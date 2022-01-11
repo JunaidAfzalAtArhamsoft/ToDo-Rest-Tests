@@ -186,7 +186,12 @@ margin:0px;
                 <input type="checkbox" onclick="myFunction()">
                 <span class="slider round"></span>
               </label>
-              <img src="{% static 'frontend images/moon.svg' %}">
+              {% load static %}
+              <img id="moon-night"
+                src="{% static 'frontend images/moon.png' %}"
+                width="20"
+                height="20"
+              >
             </li>
           </ul>
 
@@ -206,7 +211,11 @@ margin:0px;
     This is landing page of Task Management System.
   </div>
 {% load static %}
-<img src="{% static 'frontend images/moon.png' %}">
+          <img id="moon"
+            src="{% static 'frontend images/moon.png' %}"
+            width="20"
+            height="20"
+            >
 
 
 
