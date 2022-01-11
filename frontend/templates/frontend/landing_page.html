@@ -181,13 +181,21 @@ margin:0px;
             <li class="nav-item">
               <a class="nav-link disabled">Profile</a>
             </li>
-            <li class="nav-item" style="margin-left: 640px; margin-top: 8px;">
+            <li>
+              <img id="sun" style="margin-left:600px; margin-top:9px;"
+                src="{% static 'frontend images/sun.png' %}"
+                width="20"
+                height="20"
+              >
+            </li>
+            <li class="nav-item" style="margin-left: 20px; margin-top: 8px;">
               <label class="switch">
                 <input type="checkbox" onclick="myFunction()">
                 <span class="slider round"></span>
               </label>
-              {% load static %}
-              <img id="moon-night"
+            </li>
+            <li>
+              <img id="moon-night" style="margin-left:1px; margin-top:9px;"
                 src="{% static 'frontend images/moon.png' %}"
                 width="20"
                 height="20"
