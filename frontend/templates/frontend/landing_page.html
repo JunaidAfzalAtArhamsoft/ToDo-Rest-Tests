@@ -160,6 +160,7 @@ margin:0px;
 <nav class="navbar navbar-expand-lg navbar-fixed-top navbar-dark bg-dark" >
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
+          {% load static %}
           <img id="loading"
             src="{% static 'frontend images/2.png' %}"
             width="40"
@@ -180,11 +181,25 @@ margin:0px;
             <li class="nav-item">
               <a class="nav-link disabled">Profile</a>
             </li>
-            <li class="nav-item" style="margin-left: 640px; margin-top: 8px;">
+            <li class="nav-item" style="margin-left:600px; margin-top:6px;">
+              <img id="sun"
+                src="{% static 'frontend images/sun.png' %}"
+                width="20"
+                height="20"
+              >
+            </li>
+            <li class="nav-item" style="margin-left: 20px; margin-top: 8px;">
               <label class="switch">
                 <input type="checkbox" onclick="myFunction()">
                 <span class="slider round"></span>
               </label>
+            </li>
+            <li class="nav-item" style="margin-left:1px; margin-top:6px;">
+              <img id="moon-night"
+                src="{% static 'frontend images/moon.png' %}"
+                width="20"
+                height="20"
+              >
             </li>
           </ul>
 
@@ -203,8 +218,12 @@ margin:0px;
     <h1 style="text-align: center; font-family: 'High Tower Text">Task Management System</h1>
     This is landing page of Task Management System.
   </div>
-
-
+{% load static %}
+          <img id="moon"
+            src="{% static 'frontend images/moon.png' %}"
+            width="20"
+            height="20"
+            >
 
 
 

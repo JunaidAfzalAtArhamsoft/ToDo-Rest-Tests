@@ -55,8 +55,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # for static file to work in server
 ]
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # for static file to work in server
 ROOT_URLCONF = 'ToDo_REST.urls'
 
 TEMPLATES = [
@@ -176,9 +177,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)
+# STATICFILES_DIRS = (
+#     os.path.join(BASE_DIR, 'static'),
+# )
 
 
 SIMPLE_JWT = {
